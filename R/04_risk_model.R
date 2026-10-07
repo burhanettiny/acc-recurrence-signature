@@ -72,6 +72,7 @@ for (r in 1:20) {
     lp   <- as.vector(t(V[pick, te]) %*% as.vector(coef(fit, s = "lambda.min")))
     cvC  <- c(cvC, concordance(Surv(d$time[te], d$event[te]) ~ lp, reverse = TRUE)$concordance)
   }
+  cat("  nested CV repeat", r, "of 20 done\n")
 }
 nested_summary <- c(mean = mean(cvC), median = median(cvC), quantile(cvC, c(.025, .975)))
 print(round(nested_summary, 3))                                        # expected mean ~0.70

@@ -48,7 +48,7 @@ go_all <- enrichGO(entrez, OrgDb = org.Hs.eg.db, keyType = "ENTREZID", ont = "AL
                    pvalueCutoff = 0.05, qvalueCutoff = 0.05, readable = TRUE)
 kegg <- setReadable(enrichKEGG(entrez, organism = "hsa", pAdjustMethod = "BH",
                                pvalueCutoff = 0.05, qvalueCutoff = 0.05), OrgDb = org.Hs.eg.db, keyType = "ENTREZID")
-cat("GO terms:", nrow(as.data.frame(go_all)), "| KEGG pathways:", nrow(as.data.frame(kegg)), "\n")  # expected 650 / 38
+cat("GO terms:", nrow(as.data.frame(go_all)), "| KEGG pathways:", nrow(as.data.frame(kegg)), "\n")  # expected 664 / 39 (1,829 DEGs mapped to Entrez IDs)
 write.csv(as.data.frame(go_all), file.path(DIR_RES, "TableS1a_GO_full.csv"), row.names = FALSE)
 write.csv(as.data.frame(kegg),   file.path(DIR_RES, "TableS1b_KEGG_full.csv"), row.names = FALSE)
 

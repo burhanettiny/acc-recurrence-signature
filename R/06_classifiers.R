@@ -41,5 +41,6 @@ oof <- t(replicate(50, {
 oof_summary <- apply(oof, 2, quantile, c(.5, .025, .975))
 print(round(oof_summary, 4))                                          # expected C_oof ~0.749
 
+print(cls_rows)
 write.csv(cls_rows, file.path(DIR_RES, "TableS6a_classifiers_TCGA.csv"), row.names = FALSE)
 write.csv(as.data.frame(round(oof_summary, 4)), file.path(DIR_RES, "TableS6b_out_of_fold.csv"))

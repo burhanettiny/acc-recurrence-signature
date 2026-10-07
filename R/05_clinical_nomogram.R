@@ -48,7 +48,13 @@ added <- c(C_clin = concordance(clinm)$concordance, C_full = concordance(full)$c
 print(summary(full)$conf.int); print(round(added, 4))       # expected HR/SD 3.15; C 0.750 -> 0.812
 
 # ---- Restricted / sensitivity analyses (Table S3) ---------------------------
-r_row <- function(dd, lab) cox_row(dd$time, dd$event, dd$rz, lab)[, c("Model", "n", "events", "C", "HR_perSD", "p")]
+# HR per SD of the risk score in the whole cohort (rz is not re-standardized within subgroups)
+r_row <- function(dd, lab) {
+  f <- coxph(Surv(time, event) ~ rz, data = dd); cc <- concordance(f); se <- sqrt(cc$var); ci <- summary(f)$conf.int
+  data.frame(Model = lab, n = nrow(dd), events = sum(dd$event),
+             C = fmt_ci(cc$concordance, cc$concordance - 1.96 * se, cc$concordance + 1.96 * se),
+             HR_perSD = fmt_ci(ci[1], ci[3], ci[4], 2), p = signif(summary(f)$coefficients[5], 3))
+}
 tabS3 <- rbind(
   r_row(d, "All patients"),
   r_row(d[d$residual_tumor %in% "R0", ], "R0 resection only"),
@@ -105,7 +111,7 @@ dev.off()
 if (requireNamespace("polspline", quietly = TRUE)) {
   for (u in c(365, 1095)) {
     fu <- cph(Surv(time, event) ~ ridge_score + stageS + age + hormone, data = nd, x = TRUE, y = TRUE, surv = TRUE, time.inc = u)
-    set.seed(SEED); print(calibrate(fu, u = u, B = 200, cmethod = "hare"))   # mean |error| 0.063 / 0.076
+    set.seed(SEED); print(calibrate(fu, u = u, B = 200, cmethod = "hare"))   # mean |error| ~0.060 / ~0.078
   }
 }
 

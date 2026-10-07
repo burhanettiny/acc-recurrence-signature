@@ -16,7 +16,7 @@ ppi_network <- ppi_network %>% mutate(from_symbol = id2sym[from], to_symbol = id
 write.csv(ppi_network, file.path(DIR_RES, "PPI_network_edges.csv"), row.names = FALSE)
 
 g <- simplify(graph_from_data_frame(ppi_network[, c("from_symbol", "to_symbol")], directed = FALSE))
-cat("Network:", vcount(g), "nodes,", ecount(g), "edges\n")
+cat("Network:", vcount(g), "nodes,", ecount(g), "unique edges\n")   # expected 183 / 365
 centrality_df <- data.frame(gene = V(g)$name, degree = degree(g),
                             betweenness = betweenness(g, normalized = TRUE),
                             closeness = closeness(g, normalized = TRUE))
