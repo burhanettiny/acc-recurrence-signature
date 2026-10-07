@@ -44,6 +44,7 @@ read_biotab <- function(table_name) {
   f <- f[endsWith(f, paste0("_clinical_", table_name, ".txt"))]
   stopifnot(length(f) == 1)
   x <- read.delim(f, check.names = FALSE, stringsAsFactors = FALSE, quote = "", na.strings = "")
+  names(x) <- make.unique(names(x))
   x[-c(1, 2), , drop = FALSE]
 }
 
