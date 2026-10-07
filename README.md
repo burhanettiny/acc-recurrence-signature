@@ -63,7 +63,7 @@ The first run downloads TCGA-ACC RNA-seq data (~1 GB) from the GDC and three GEO
 
 ## Citation
 
-If you use this code, please cite the article above and the archived release: [Zenodo DOI to be added].
+If you use this code, please cite the article above and the archived release: [https://doi.org/10.5281/zenodo.23213384].
 
 ## License
 
