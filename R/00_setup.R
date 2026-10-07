@@ -26,6 +26,9 @@ GDC_DIR    <- Sys.getenv("GDC_DIR", unset = file.path("data", "GDCdata"))
 for (d in c(DIR_RES, DIR_FIG, DIR_MOD, GDC_DIR)) dir.create(d, showWarnings = FALSE, recursive = TRUE)
 
 SEED <- 2026
+options(timeout = 1200)   # large downloads (GDC, STRING, GEO)
+DIR_STRING <- Sys.getenv("STRING_DIR", unset = file.path("data", "STRINGdb_cache"))
+dir.create(DIR_STRING, showWarnings = FALSE, recursive = TRUE)
 # The ridge coefficients reported in the manuscript are archived in models/.
 # With USE_ARCHIVED_MODELS = TRUE the archived coefficients are used for all
 # downstream analyses (the models are also refitted and compared, see 04_).
