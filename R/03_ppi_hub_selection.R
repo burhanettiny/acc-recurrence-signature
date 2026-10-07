@@ -6,7 +6,7 @@
 
 sig_for_ppi <- sig_genes_annotated %>% distinct(SYMBOL, .keep_all = TRUE) %>% arrange(padj) %>% slice_head(n = 300)
 
-string_db <- STRINGdb$new(version = "12.0", species = 9606, score_threshold = 400, input_directory = "")
+string_db <- STRINGdb$new(version = "12.0", species = 9606, score_threshold = 400, input_directory = DIR_STRING)  # files cached between runs
 mapped <- string_db$map(sig_for_ppi, "SYMBOL", removeUnmappedRows = TRUE)
 cat("Mapped to STRING:", nrow(mapped), "/ 300\n")                    # expected 261
 ppi_network <- string_db$get_interactions(mapped$STRING_id)
