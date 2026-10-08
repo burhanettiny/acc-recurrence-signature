@@ -120,18 +120,18 @@ c_ci <- function(f) { cc <- concordance(f); se <- sqrt(cc$var); fmt_ci(cc$concor
 hr_ci <- function(f, i = 1) { s <- summary(f)$conf.int; fmt_ci(s[i, 1], s[i, 3], s[i, 4], 2) }
 f_un <- coxph(S ~ predict(m6)); f_7 <- coxph(S ~ scale(score_z(d, b7)))
 tab2 <- data.frame(
-  Model = c("Six-gene ridge risk score (final model)", "Six-gene unpenalized Cox, apparent",
+  Model = c("Six-gene ridge risk score (final model)", "Six-gene ridge risk score, bootstrap-corrected", "Six-gene unpenalized Cox, apparent",
             "Six-gene unpenalized Cox, bootstrap-corrected", "Full pipeline, nested CV (mean; 2.5-97.5th pct)",
             "Seven-gene ridge (including CDK6)", "Clinical model (stage, age, hormone, resection)",
             "Clinical model + risk score", "Nomogram, apparent / bootstrap-corrected"),
-  n_events = c("79 / 37", "79 / 37", "79 / 37", "79 / 37", "79 / 37",
+  n_events = c("79 / 37", "79 / 37", "79 / 37", "79 / 37", "79 / 37", "79 / 37",
                paste(nrow(dm), "/", sum(dm$event)), paste(nrow(dm), "/", sum(dm$event)), paste(nrow(nd), "/", sum(nd$event))),
-  C = c(c_ci(f_rz), c_ci(f_un), sprintf("%.3f", boot_summary["C_corrected"]),
+  C = c(c_ci(f_rz), sprintf("%.3f", ridge_boot["C_corrected"]), c_ci(f_un), sprintf("%.3f", boot_summary["C_corrected"]),
         fmt_ci(nested_summary["mean"], nested_summary["2.5%"], nested_summary["97.5%"]), c_ci(f_7),
         sprintf("%.3f", added["C_clin"]), sprintf("%.3f", added["C_full"]),
         sprintf("%.3f / %.3f", nomo_C["apparent"], nomo_C["corrected"])),
-  HR_perSD = c(hr_ci(f_rz), "", "", "", hr_ci(f_7), "", hr_ci(full), ""),
-  p = c(signif(summary(f_rz)$coefficients[5], 2), "", "", "", signif(summary(f_7)$coefficients[5], 2), "",
+  HR_perSD = c(hr_ci(f_rz), "", "", "", "", hr_ci(f_7), "", hr_ci(full), ""),
+  p = c(signif(summary(f_rz)$coefficients[5], 2), "", "", "", "", signif(summary(f_7)$coefficients[5], 2), "",
         signif(added["LRT_p"], 2), ""))
 write.csv(tab2, file.path(DIR_RES, "Table2_TCGA_performance.csv"), row.names = FALSE)
 print(tab2)
