@@ -16,15 +16,18 @@ cat("Analysis dataset:", nrow(d), "patients,", sum(d$event), "events\n")   # exp
 S <- Surv(d$time, d$event)
 
 # ---- Figure 3: Kaplan-Meier curves per gene (median split) -------------------
-km_list <- lapply(GENES6, function(gn) {
+km_list <- lapply(seq_along(GENES6), function(i) {
+  gn <- GENES6[i]
   df <- data.frame(t = d$time, e = d$event,
                    grp = factor(ifelse(d[[gn]] >= median(d[[gn]]), "High", "Low"), levels = c("Low", "High")))
-  ggsurvplot(survfit(Surv(t, e) ~ grp, data = df), data = df, pval = TRUE, risk.table = FALSE,
-             title = gn, xlab = "Days", ylab = "Recurrence-free survival", legend.title = "",
-             legend.labs = c("Low", "High"), palette = c("#2166AC", "#B2182B"))
+  ggsurvplot(survfit(Surv(t, e) ~ grp, data = df), data = df, pval = TRUE, pval.size = 4,
+             title = paste0(LETTERS[i], "  ", gn), xlab = "Days", ylab = "Recurrence-free survival",
+             legend.title = "", legend.labs = c("Low", "High"), palette = c("#2166AC", "#B2182B"),
+             font.title = c(13, "bold.italic"))
 })
 png(file.path(DIR_FIG, "Figure3_KM_genes.png"), width = 4200, height = 2600, res = 300)
-print(arrange_ggsurvplots(km_list, ncol = 3, nrow = 2, print = FALSE)); dev.off()
+# arrange_ggsurvplots fills column-wise: reorder so that rows read A-B-C / D-E-F
+print(arrange_ggsurvplots(km_list[c(1, 4, 2, 5, 3, 6)], ncol = 3, nrow = 2, print = FALSE)); dev.off()
 
 # ---- Univariate and unpenalized multivariable Cox ----------------------------
 uni <- do.call(rbind, lapply(GENES7, function(gn) {
@@ -93,6 +96,21 @@ if (USE_ARCHIVED_MODELS && file.exists(arch_file)) {
 }
 print(round(b6, 3))   # NDC80 0.043, BUB1 0.255, TYMS 0.363, ASPM 0.241, NCAPH 0.152, SPAG5 0.138
 
+# ---- Bootstrap optimism of the ridge model (lambda re-selected in each resample) ----
+fit_ridge_boot <- function(Xb, yb) {
+  mu <- colMeans(Xb); s <- apply(Xb, 2, sd)
+  cv <- cv.glmnet(scale(Xb, mu, s), yb, family = "cox", alpha = 0, nfolds = 10)
+  list(b = as.vector(coef(cv, s = "lambda.min")), mu = mu, s = s)
+}
+cidx <- function(score, yy) concordance(yy ~ score, reverse = TRUE)$concordance
+X6 <- as.matrix(d[, GENES6])
+C_ridge_app <- cidx(as.vector(scale(X6) %*% b6), S)
+set.seed(SEED); opt_r <- replicate(200, {
+  idx <- sample(nrow(X6), replace = TRUE); m <- fit_ridge_boot(X6[idx, ], S[idx])
+  cidx(as.vector(scale(X6[idx, ], m$mu, m$s) %*% m$b), S[idx]) - cidx(as.vector(scale(X6, m$mu, m$s) %*% m$b), S) })
+ridge_boot <- c(C_apparent = C_ridge_app, optimism = mean(opt_r), C_corrected = C_ridge_app - mean(opt_r))
+print(round(ridge_boot, 3))                                            # expected 0.773 / 0.013 / 0.760
+
 d$ridge_score <- score_z(d, b6)
 d$rz <- as.vector(scale(d$ridge_score))
 
@@ -101,5 +119,5 @@ tabS7 <- data.frame(gene = GENES6, beta_unpenalized = coef(m6), HR = summary(m6)
                     p = summary(m6)$coefficients[, 5], beta_ridge_perSD = b6[GENES6])
 write.csv(tabS7, file.path(DIR_RES, "TableS7_coefficients.csv"), row.names = FALSE)
 saveRDS(list(b6 = b6, b7 = b7, b5 = b5, coefs_6gene = coefs_6gene, coefs_7gene = coefs_7gene,
-             boot = boot_summary, nested = nested_summary, nested_C = cvC),
+             boot = boot_summary, ridge_boot = ridge_boot, nested = nested_summary, nested_C = cvC),
         file.path(DIR_MOD, "models_this_run.rds"))
