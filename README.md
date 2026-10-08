@@ -2,7 +2,7 @@
 
 Code to reproduce all analyses of:
 
-> Yalçınkaya B, *et al.* Identification of a Recurrence-Associated Cell-Cycle Gene Signature in Adrenocortical Carcinoma: Development in TCGA and External Evaluation in Adult and Pediatric Cohorts. *[Journal]*, [year]. doi: [to be added]
+> Yalçınkaya B, Altin G.* Identification of a Recurrence-Associated Cell-Cycle Gene Signature in Adrenocortical Carcinoma: Development in TCGA and External Evaluation in Adult and Pediatric Cohorts. *[Journal]*, [year]. doi: [to be added]
 
 A six-gene signature (*NDC80, BUB1, TYMS, ASPM, NCAPH, SPAG5*) associated with recurrence-free survival after surgical resection was derived in TCGA-ACC with ridge-penalized Cox regression and evaluated in three GEO cohorts (GSE10927, GSE19750, GSE76021).
 
@@ -29,7 +29,7 @@ Outputs are written to `results/` (tables, `sessionInfo.txt`) and `figures/`.
 
 ## Requirements
 
-R ≥ 4.5 with Bioconductor 3.22. The analyses were run with R 4.5.2, DESeq2 1.50.2, TCGAbiolinks 2.38.0, clusterProfiler 4.18.4, STRINGdb 2.22.0, igraph 2.3.2, survival 3.8.6, survminer 0.5.2, rms 8.1.1, cmprsk 2.2.12, glmnet 5.0, GEOquery 2.78.0, msigdbr 26.1.1, hgu133plus2.db 3.13.0 and hgu133a.db 3.13.0 (full list in `results/sessionInfo.txt`).
+R ≥ 4.5 with Bioconductor 3.22. The analyses were run with R 4.5.2, DESeq2 1.50.2, TCGAbiolinks 2.38.0, clusterProfiler 4.18.4, STRINGdb 2.22.0, igraph 2.3.2, survival 3.8.6, survminer 0.5.2, rms 8.1.1, cmprsk 2.2.12, glmnet 5.0, GEOquery 2.78.0, hgu133plus2.db 3.13.0, hgu133a.db 3.13.0, ggraph 2.2.2 and EnhancedVolcano 1.28.2 (full list in `results/sessionInfo.txt`).
 
 ```r
 install.packages(c("BiocManager", "dplyr", "tibble", "tidyr", "survival", "survminer",
@@ -54,6 +54,7 @@ The first run downloads TCGA-ACC RNA-seq data (~1 GB) from the GDC and three GEO
 * **Clinical data.** GDC clinical records are updated over time. The BCR Biotab files and the follow-up values used in the study are bundled in `data/` and are used in preference to newly downloaded records.
 * **Ridge coefficients.** The coefficients reported in the manuscript are archived in `models/`. The models are also refitted in `04_risk_model.R`, and the maximum difference between refitted and archived coefficients is printed. Set `USE_ARCHIVED_MODELS <- FALSE` in `00_setup.R` to use the refitted coefficients instead.
 * **Resampling.** Bootstrap and cross-validation estimates (optimism-corrected C-index, nested cross-validation, calibration, confidence intervals of ΔC) depend on the random-number stream and may differ slightly (typically in the third decimal) between platforms and package versions.
+* **Ridge optimism.** `04_risk_model.R` also reports the bootstrap optimism-corrected C-index of the ridge model (λ re-selected in each of 200 resamples; expected 0.760).
 * **Expected key values** are printed as comments next to the corresponding commands (e.g. 79 patients / 37 events; 2,101 DEGs; ridge C-index 0.773).
 
 ## Data sources
@@ -63,7 +64,7 @@ The first run downloads TCGA-ACC RNA-seq data (~1 GB) from the GDC and three GEO
 
 ## Citation
 
-If you use this code, please cite the article above and the archived release: [https://doi.org/10.5281/zenodo.23213384].
+If you use this code, please cite the article above and the archived release on Zenodo (concept DOI for all versions: https://doi.org/10.5281/zenodo.23213383).
 
 ## License
 
