@@ -1,0 +1,10 @@
+data/GDCdata/
+data/STRINGdb_cache/
+GDCdata/
+results/
+figures/
+*.RData
+*.rds
+!models/*.rds
+.Rhistory
+.Rproj.user/
