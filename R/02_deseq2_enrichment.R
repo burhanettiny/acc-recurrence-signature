@@ -36,10 +36,16 @@ write.csv(sig_genes_annotated, file.path(DIR_RES, "DEG_significant_annotated.csv
 
 # ---- Figure 1: volcano plot --------------------------------------------------
 if (requireNamespace("EnhancedVolcano", quietly = TRUE)) {
-  p_vol <- EnhancedVolcano::EnhancedVolcano(res_df, lab = res_df$gene_symbol, x = "log2FoldChange", y = "padj",
-                                            pCutoff = 0.05, FCcutoff = 1, title = "Recurrent vs Non-recurrent ACC",
-                                            subtitle = "Differential gene expression (TCGA-ACC cohort, n=79)")
-  ggsave(file.path(DIR_FIG, "Figure1_volcano.png"), p_vol, width = 9, height = 7, dpi = 300)
+  rv  <- res_df[!is.na(res_df$padj), ]
+  sg  <- rv[rv$padj < 0.05 & abs(rv$log2FoldChange) > 1, ]
+  lab <- unique(c(head(sg$gene_symbol[order(sg$padj)], 15), GENES6))   # top 15 DEGs + signature genes
+  p_vol <- EnhancedVolcano::EnhancedVolcano(rv, lab = rv$gene_symbol, x = "log2FoldChange", y = "padj",
+             selectLab = lab, pCutoff = 0.05, FCcutoff = 1, labSize = 3.5,
+             drawConnectors = TRUE, widthConnectors = 0.4, max.overlaps = Inf, boxedLabels = FALSE,
+             ylab = bquote(~-Log[10] ~ "adjusted" ~ italic(P)),
+             legendLabels = c("NS", expression(Log[2] ~ FC), "adj. P", expression(adj. ~ P ~ and ~ log[2] ~ FC)),
+             title = "Recurrent vs non-recurrent ACC", subtitle = "TCGA-ACC cohort, n = 79", caption = "")
+  ggsave(file.path(DIR_FIG, "Figure1_volcano.png"), p_vol, width = 9, height = 7.5, dpi = 300)
 }
 
 # ---- GO / KEGG (Supplementary Table S1) -------------------------------------
